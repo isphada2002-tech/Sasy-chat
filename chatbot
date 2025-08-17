@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot تجريبي - Gemini</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; }
+    #chatbox { width: 90%; max-width: 600px; margin: 20px auto; padding: 10px; background:#fff; border-radius:10px; box-shadow:0 0 10px #ccc; }
+    #messages { height: 400px; overflow-y: auto; border:1px solid #ddd; padding:10px; margin-bottom:10px; }
+    .msg { margin:5px 0; }
+    .user { color: blue; }
+    .bot { color: green; }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <h2>🤖 Chatbot تجريبي - Gemini</h2>
+    <div id="messages"></div>
+    <input type="text" id="userInput" placeholder="اكتب رسالتك..." style="width:80%;">
+    <button onclick="sendMessage()">إرسال</button>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyBFw_ZXFwe4x-U9ZsoLK4qE9fiXtYYdQg8"; 
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY;
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const userMsg = input.value;
+      if(!userMsg) return;
+
+      addMessage("أنت", userMsg, "user");
+      input.value = "";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userMsg }] }]
+          })
+        });
+        const data = await response.json();
+        const botMsg = data.candidates[0].content.parts[0].text;
+        addMessage("البوت", botMsg, "bot");
+      } catch (e) {
+        addMessage("⚠️ خطأ", "تعذر الاتصال بالـ API", "bot");
+      }
+    }
+
+    function addMessage(sender, text, cls) {
+      const messages = document.getElementById("messages");
+      messages.innerHTML += `<div class="msg ${cls}"><b>${sender}:</b> ${text}</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
